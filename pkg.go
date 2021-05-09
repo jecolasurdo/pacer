@@ -1,7 +1,6 @@
 package pacer
 
 import (
-	"log"
 	"math/rand"
 	"time"
 
@@ -17,6 +16,13 @@ type Pacer struct {
 
 type distribution interface {
 	Rand() float64
+}
+
+// SetConstantPace returns a Pace where the minimum wait time is a constant,
+// where the length of the waiting period is `period`, and `basis` is the
+// wait-time unit duration.
+func SetConstantPace(period float64, basis time.Duration) *Pacer {
+	return SetUniformPace(period, period, basis)
 }
 
 // SetNormalPace returns a Pace where mu is the average wait time, sigma is the
@@ -56,7 +62,6 @@ func (p *Pacer) Wait() {
 	paceTime := p.lastCallTime.Add(paceDuration)
 	if time.Now().Before(paceTime) {
 		waitDuration := paceTime.Sub(time.Now())
-		log.Printf("Pacing (%v)...", waitDuration)
 		time.Sleep(waitDuration)
 	}
 	p.lastCallTime = time.Now()
